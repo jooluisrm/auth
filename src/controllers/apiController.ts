@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
 import { User } from '../models/User';
+import JWT from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const ping = (req: Request, res: Response) => {
     res.json({ pong: true });
@@ -28,7 +32,6 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-
 export const login = async (req: Request, res: Response) => {
     if (req.body.email && req.body.password) {
         let email: string = req.body.email;
@@ -39,7 +42,13 @@ export const login = async (req: Request, res: Response) => {
         });
 
         if (user) {
-            res.json({ status: true });
+            const token = JWT.sign(
+                { id: user.id, email: user.email },
+                process.env.JWT_SECRET_KEY as string,
+                { expiresIn: '2h' }
+            );
+
+            res.json({ status: true, token });
             return;
         }
     }
