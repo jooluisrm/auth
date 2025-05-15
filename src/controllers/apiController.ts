@@ -24,7 +24,13 @@ export const register = async (req: Request, res: Response) => {
         }
 
         const newUser = await User.create({ email, password });
-        return res.status(201).json({ id: newUser.id });
+        const token = JWT.sign(
+            { id: newUser.id, email: newUser.email },
+            process.env.JWT_SECRET_KEY as string,
+            { expiresIn: '2h' }
+        );
+
+        return res.status(201).json({ id: newUser.id, token });
 
     } catch (error) {
         console.error(error);
